@@ -47,23 +47,22 @@ const [newEvent, setNewEvent] = useState({
     memo: "",
     color: "#c7daf8"
 })
-// 날짜 클릭 시 실행되는 함수
+// 날짜 클릭 시 모달창 열기
   const handleDateClick = (info) => {
     // 클릭한 날짜를 시작/종료 시간의 기본값으로 세팅
     setNewEvent({ 
       ...newEvent, 
-      start: info.dateStr + "T09:00", 
+      start: info.dateStr + "T09:00",  
       end: info.dateStr + "T09:00" 
     });
     setIsModalOpen(true); // 모달 열기 
   };
 
-
-  // 저장 버튼 클릭 시 실행
+ // 저장 버튼 클릭 시 실행
   const handleSave = () => {
-    //빈 일정이 저장되지 않도록 입력 검증
+    //빈 일정이 저장되지 않도록 입력 검증 if문 추가
     if (!newEvent.title) 
-      return alert("제목을 꼭 입력해주세요!");
+      return alert("제목을 꼭 입력해주세요!"); //alert창 추가
     
     //데이터 생성
     const saveEvent = {
@@ -72,7 +71,7 @@ const [newEvent, setNewEvent] = useState({
     };
 
     setEvents([...events, saveEvent]); // 배열 업데이트
-    setIsModalOpen(false); // 모달 닫기
+    setIsModalOpen(false); // 모달창 닫기
     setNewEvent({//새일정 등록시 신규 이벤트 배열 초기화
     title: "",
     start: "",
@@ -80,9 +79,8 @@ const [newEvent, setNewEvent] = useState({
     memo: "",
     color: "#c7daf8"
     });
-    alert("일정이 저장되었습니다!"); // 피드백
+    alert("일정이 저장되었습니다!"); //alert창으로 저장 피드백
   };
-
 
   return (
 <div className="d-flex flex-column min-vh-100">
@@ -97,9 +95,9 @@ const [newEvent, setNewEvent] = useState({
               <AddEventModal 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
-                onSave={handleSave}
                 newEvent={newEvent}
                 setNewEvent={setNewEvent}
+                onSave ={handleSave}
               />
             </div>
       </main>
