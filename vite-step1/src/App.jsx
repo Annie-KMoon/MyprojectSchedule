@@ -52,34 +52,52 @@ const [newEvent, setNewEvent] = useState({
     // 클릭한 날짜를 시작/종료 시간의 기본값으로 세팅
     setNewEvent({ 
       ...newEvent, 
+      title: "",
       start: info.dateStr + "T09:00",  
       end: info.dateStr + "T09:00" 
     });
     setIsModalOpen(true); // 모달 열기 
   };
 
- // 저장 버튼 클릭 시 실행
-  const handleSave = () => {
-    //빈 일정이 저장되지 않도록 입력 검증 if문 추가
-    if (!newEvent.title) 
-      return alert("제목을 꼭 입력해주세요!"); //alert창 추가
-    
-    //데이터 생성
-    const saveEvent = {
-      ...newEvent,
-      id: crypto.randomUUID() // 수정/삭제를 위한 고유 ID 부여 
-    };
-
-    setEvents([...events, saveEvent]); // 배열 업데이트
+// 모달창 닫기
+  const handleClose = () =>{
     setIsModalOpen(false); // 모달창 닫기
-    setNewEvent({//새일정 등록시 신규 이벤트 배열 초기화
+    setSelectedEventId(null);
+    setNewEvent({// 신규 이벤트 배열 초기화
     title: "",
     start: "",
     end: "",
     memo: "",
     color: "#c7daf8"
     });
+  }
+
+ // 저장 버튼 클릭 시 실행 함수
+  const handleSave = () => {
+    //빈 일정이 저장되지 않도록 입력 검증 if문 추가
+    if (!newEvent.title) 
+      return alert("제목을 꼭 입력해주세요!"); //alert창 추가
+    
+    //1. 데이터 수정: selectedEventId가 있을 때
+    if (selectedEventId) {
+      const updatedEvents = events.map ((e) =>
+        e.id ===selectedEventId ? { ...newEvent, id: selectedEventId} : e
+      );
+      setEvents(updatedEvents);
+      alert("일정이 수정되었습니다.");
+    }
+
+    //2. 신규 등록 : selectedEventId=null일 때
+    else{
+      const saveEvent = {
+      ...newEvent,
+      id: crypto.randomUUID() // 수정/삭제를 위한 고유 ID 부여
+    };
+    setEvents([...events, saveEvent]); // 배열 업데이트 
     alert("일정이 저장되었습니다!"); //alert창으로 저장 피드백
+  }
+  //모달창 닫고 상태 초기화
+  handleClose();
   };
 
 //생성된 이벤트 클릭시 상세 일정 보기
@@ -115,10 +133,11 @@ const handleEventClick = (clickInfo) => {//clickinfo: 클릭된 일정 정보
               {/* 모달 컴포넌트 배치 */}
               <AddEventModal 
                 isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
+                onClose={handleClose} 
                 newEvent={newEvent}
                 setNewEvent={setNewEvent}
                 onSave ={handleSave}
+                isEditMode = {!!selectedEventId}//selectedEventId가 존재하면 true, 없으면 false
               />
             </div>
       </main>

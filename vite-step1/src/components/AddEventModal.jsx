@@ -1,7 +1,7 @@
 import React from 'react';
 
 // 부모(App.jsx)로부터 필요한 데이터와 함수를 전달받기(props)
-const AddEventModal = ({isOpen, onClose, newEvent, onSave, setNewEvent})=>{
+const AddEventModal = ({isOpen, onClose, newEvent, onSave, setNewEvent, isEditMode})=>{
     //1. 모달이 닫혀있으면(false) 아무것도 렌더링 하지 않는다.
     if(!isOpen) return null;
 
@@ -13,7 +13,9 @@ return(
 
  {/* 헤더 영역 */}
         <div className="modal-header bg-primary text-white">
-            <h6 className="modal-title">🗓️ 새 일정 등록</h6>
+            <h6 className="modal-title">
+                {isEditMode ? "🗓️ 일정 수정하기" : "🗓️ 새 일정 등록"}
+            </h6>
             <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
         </div>
             {/* 바디 영역: 데이터(제목, 시작, 종료, 메모, 색상) 입력 */}
