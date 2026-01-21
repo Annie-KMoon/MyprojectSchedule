@@ -82,6 +82,27 @@ const [newEvent, setNewEvent] = useState({
     alert("일정이 저장되었습니다!"); //alert창으로 저장 피드백
   };
 
+//생성된 이벤트 클릭시 상세 일정 보기
+// 선택된 이벤트 아이디 선언
+const [selectedEventId, setSelectedEventId] = useState(null);
+// 일정을 클릭했을 때 실행될 함수 구현
+const handleEventClick = (clickInfo) => {//clickinfo: 클릭된 일정 정보
+  const clickedEvent = events.find((e) => e.id === clickInfo.event.id);
+  if (clickedEvent) {//선택된 이벤트가 있다면
+    setNewEvent({ //새로운 일정 입력 폼에 클릭한 일정 정보를 채워넣기
+      title: clickedEvent.title,
+      start: clickedEvent.start,
+      end: clickedEvent.end || clickedEvent.start, // 종료일 없으면 시작일로
+      memo: clickedEvent.memo || "", //메모내용 없을 때 공란
+      color: clickedEvent.color,
+    });
+    //현재 어떤 이벤트를 수정 중인지 Id를 저장해두기
+    setSelectedEventId(clickedEvent.id);
+    //세팅된 데이터를 모달창을 띄워 보여주기
+    setIsModalOpen(true);
+  }
+};
+
   return (
 <div className="d-flex flex-column min-vh-100">
       {/* 상단 헤더 */}
@@ -90,7 +111,7 @@ const [newEvent, setNewEvent] = useState({
       <main className="flex-fill container">
         <div className="container py-4">
               {/* 달력 페이지 호출 (events와 클릭 함수 전달) */}
-              <CalendarPage events={events} onDateClick={handleDateClick} />
+              <CalendarPage events={events} onDateClick={handleDateClick} onEventClick={handleEventClick} />
               {/* 모달 컴포넌트 배치 */}
               <AddEventModal 
                 isOpen={isModalOpen} 

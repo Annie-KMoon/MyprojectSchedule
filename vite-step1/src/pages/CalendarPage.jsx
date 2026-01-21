@@ -5,7 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
 
-export default function CalendarPage({ events, onDateClick, onEventClick }) {
+export default function CalendarPage({ events, onDateClick, onEventClick}) {
 return (
     <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
