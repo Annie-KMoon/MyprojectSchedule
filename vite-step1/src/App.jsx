@@ -74,9 +74,9 @@ const [newEvent, setNewEvent] = useState({
 
  // 저장 버튼 클릭 시 실행 함수
   const handleSave = () => {
-    //빈 일정이 저장되지 않도록 입력 검증 if문 추가
+    //빈 일정이 저장되지 않도록 입력 검증 if문
     if (!newEvent.title) 
-      return alert("제목을 꼭 입력해주세요!"); //alert창 추가
+      return alert("제목을 꼭 입력해주세요!"); //alert
     
     //1. 데이터 수정: selectedEventId가 있을 때
     if (selectedEventId) {
@@ -110,14 +110,26 @@ const handleEventClick = (clickInfo) => {//clickinfo: 클릭된 일정 정보
     setNewEvent({ //새로운 일정 입력 폼에 클릭한 일정 정보를 채워넣기
       title: clickedEvent.title,
       start: clickedEvent.start,
-      end: clickedEvent.end || clickedEvent.start, // 종료일 없으면 시작일로
-      memo: clickedEvent.memo || "", //메모내용 없을 때 공란
+      end: clickedEvent.end || clickedEvent.start, // 종료일 없으면 시작일로(or)
+      memo: clickedEvent.memo || "", //메모내용 없을 때 공란(or)
       color: clickedEvent.color,
     });
     //현재 어떤 이벤트를 수정 중인지 Id를 저장해두기
     setSelectedEventId(clickedEvent.id);
     //세팅된 데이터를 모달창을 띄워 보여주기
     setIsModalOpen(true);
+  }
+};
+
+//이벤트 삭제 함수
+const handleDelete= () =>{
+  if(window.confirm("일정을 삭제하시겠습니까?")){
+    //filter메서드를 사용하여 selectedEventId를 제외한 나머지 배열로 새로운 배열을 만든다.
+    const filteredEvents = events.filter((e)=>e.id !==selectedEventId);
+    setEvents(filteredEvents);
+    alert("일정이 삭제되었습니다.");
+    //모달창 닫고 상태 초기화
+    handleClose();
   }
 };
 
@@ -137,7 +149,8 @@ const handleEventClick = (clickInfo) => {//clickinfo: 클릭된 일정 정보
                 newEvent={newEvent}
                 setNewEvent={setNewEvent}
                 onSave ={handleSave}
-                isEditMode = {!!selectedEventId}//selectedEventId가 존재하면 true, 없으면 false
+                isEditMode = {!!selectedEventId}//selectedEventId가 존재하면 true, 없으면 false(boolean)
+                onDelete = {handleDelete}
               />
             </div>
       </main>

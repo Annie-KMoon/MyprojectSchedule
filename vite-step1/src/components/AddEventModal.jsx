@@ -1,7 +1,7 @@
 import React from 'react';
 
 // 부모(App.jsx)로부터 필요한 데이터와 함수를 전달받기(props)
-const AddEventModal = ({isOpen, onClose, newEvent, onSave, setNewEvent, isEditMode})=>{
+const AddEventModal = ({isOpen, onClose, newEvent, onSave, setNewEvent, isEditMode, onDelete})=>{
     //1. 모달이 닫혀있으면(false) 아무것도 렌더링 하지 않는다.
     if(!isOpen) return null;
 
@@ -74,8 +74,17 @@ return(
             </div>
 {/* 푸터 영역: 저장/취소 버튼*/}
             <div className="modal-footer border-0">
-                <button type="button" className="btn btn-secondary" onClick={onClose}>CANCLE</button>
-                <button type="button" className="btn btn-primary px-4" onClick={onSave}>SAVE</button>
+                {/* 수정모드일 때만 삭제버튼 노출 */}
+                <div>
+                    {isEditMode && (
+                        <button type="button" className="btn btn-danger px-4" onClick={onDelete}>DELETE</button>
+                    )}
+                </div>
+                {/* 취소 및 저장 버튼 */}
+                <div>
+                    <button type="button" className="btn btn-secondary px-4 me-2" onClick={onClose}>CANCLE</button>
+                    <button type="button" className="btn btn-primary px-4" onClick={onSave}>SAVE</button>
+                </div>
             </div>
         </div>
     </div>
