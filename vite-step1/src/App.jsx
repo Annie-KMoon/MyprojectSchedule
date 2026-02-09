@@ -1,4 +1,5 @@
 // src/components/App.jsx
+import axios from 'axios';
 import "bootstrap/dist/css/bootstrap.min.css"
 import { Route, Routes } from "react-router-dom"
 import CalendarPage from "./pages/CalendarPage"
@@ -9,19 +10,22 @@ import AddEventModal from "./components/AddEventModal";
 
 // Firestore 관련 도구들 임포트
 // 1. Firestore 조작에 필요한 기능들 가져오기
-import {
-  collection,
-  addDoc,
-  doc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  serverTimestamp,
-} from "firebase/firestore";
+// import {
+//   collection,
+//   addDoc,
+//   doc,
+//   updateDoc,
+//   deleteDoc,
+//   onSnapshot,
+//   query,
+//   orderBy,
+//   serverTimestamp,
+// } from "firebase/firestore";
 
-import { db } from "./service/firebase";
+// import { db } from "./service/firebase";
+
+// 서버 기본 주소 설정
+const API_URL = "http://localhost:5000/api/schedules";
 
 // DB 객체 생성 및 컬렉션 이름 설정
 const COLLECTION = "schedules"; 
@@ -43,7 +47,23 @@ function App() {
     color: ""
   })
 
-  // ✅ 1) Firestore에서 불러오기(실시간 구독) - useEffect
+
+//✅백엔드로 연결 - useEffect (axios.get)
+useEffect(() => {
+  const loadEvents = async () => {
+    try {
+      const response = await axios.get(API_URL);
+      setEvents(response.data); // 서버가 준 데이터를 상태에 저장
+    } catch (error) {
+      console.error("데이터로드실패", error);
+    }
+  };
+  loadEvents();
+}, []);
+
+
+// ✅ 1) Firestore에서 불러오기(실시간 구독) - useEffect
+/*
   useEffect(() => {
     const q = query(collection(db, COLLECTION), orderBy("SCHEDULE_START", "asc"));
     const unsub = onSnapshot(q, (snap) => {
@@ -63,6 +83,7 @@ function App() {
     });
     return () => unsub(); // 구독 해제
   }, []);
+*/
 
   // 날짜 클릭 시 모달창 열기
   const handleDateClick = (info) => {
@@ -90,7 +111,34 @@ function App() {
     });
   }
 
+// ✅ 저장 버튼 클릭 시 실행 함수 (백엔드 POST/PUT 연동)
+const handleSave = async () => {
+  if (!newEvent.title) return alert("제목을 꼭 입력해주세요!");
+
+  try {
+    if (selectedEventId) {
+      // 1. [수정] axios.put 사용
+      await axios.put(`${API_URL}/${selectedEventId}`, newEvent);
+      alert("일정이 수정되었습니다.");
+    } else {
+      // 2. [신규 등록] axios.post 사용
+      await axios.post(API_URL, newEvent);
+      alert("일정이 저장되었습니다!");
+    }
+    
+    // 💡 중요: Firestore와 달리 axios는 실시간이 아니므로 저장 후 수동으로 다시 불러와야 합니다!
+    const response = await axios.get(API_URL);
+    setEvents(response.data);
+    
+    handleClose();
+  } catch (error) {
+    console.error("저장 실패:", error);
+    alert("서버에 저장하는 중 오류가 발생했습니다.");
+  }
+};
+
   // 저장 버튼 클릭 시 실행 함수 (async 추가)
+  /*
   const handleSave = async () => {
     if (!newEvent.title) 
       return alert("제목을 꼭 입력해주세요!");
@@ -124,11 +172,13 @@ function App() {
     }
     handleClose();
   };
+  */
 
   const [selectedEventId, setSelectedEventId] = useState(null);
 
   const handleEventClick = (clickInfo) => {
-    const clickedEvent = events.find((e) => e.id === clickInfo.event.id);
+    //서버에서 온 데이터의 id와 클릭한 일정의 id비교하기
+    const clickedEvent = events.find((e) => String(e.id) === clickInfo.event.id);
     if (clickedEvent) {
       setNewEvent({ 
         title: clickedEvent.title,
@@ -142,7 +192,29 @@ function App() {
     }
   };
 
+
+
+// ✅ 이벤트 삭제 함수 (백엔드 DELETE 연동)
+const handleDelete = async () => {
+  if (window.confirm("일정을 삭제하시겠습니까?")) {
+    try {
+      // axios.delete 사용
+      await axios.delete(`${API_URL}/${selectedEventId}`);
+      alert("일정이 삭제되었습니다.");
+      
+      // 삭제 후 데이터 새로고침
+      const response = await axios.get(API_URL);
+      setEvents(response.data);
+      
+      handleClose();
+    } catch (error) {
+      console.error("삭제 실패:", error);
+    }
+  }
+};
+
   // 이벤트 삭제 함수 (deleteDoc 사용)
+  /*
   const handleDelete = async () => {
     if(window.confirm("일정을 삭제하시겠습니까?")){
       await deleteDoc(doc(db, COLLECTION, selectedEventId));
@@ -150,6 +222,7 @@ function App() {
       handleClose();
     }
   };
+  */
 
   return (
     <div className="d-flex flex-column min-vh-100">
